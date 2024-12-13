@@ -31,10 +31,17 @@ class BlogController extends Controller
      */
     public function index(Request $request)
     {
-        // Get all categories for the dropdown
 
         $categories = $this->blogCategoryRepository->all();
-            $blogs = $this->blogRepository->all();
+
+
+        $categoryId = $request->category;
+        $blogs = $this->blogRepository->all();
+
+        if ($categoryId) {
+            $category = $this->blogCategoryRepository->find($categoryId);
+            $blogs = $category->blogs;
+        }
 
 
         return view('blogs.index', compact('blogs', 'categories'));
@@ -55,7 +62,7 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        $request['slug']= SlugGenerator::slugify($request->title);
+        $request['slug'] = SlugGenerator::slugify($request->title);
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
@@ -91,7 +98,7 @@ class BlogController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request['slug']= SlugGenerator::slugify($request->title);
+        $request['slug'] = SlugGenerator::slugify($request->title);
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
