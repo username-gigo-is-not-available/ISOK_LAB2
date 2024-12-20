@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class BlogCategoryController extends Controller
 {
-    private BlogCategoryRepository $blogCategoryRepository;
+    protected BlogCategoryRepository $blogCategoryRepository;
 
     /**
      * @param BlogCategoryRepository $blogCategoryRepository

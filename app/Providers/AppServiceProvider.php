@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use BlogCategoryRepository;
-use BlogRepository;
-use IBlogCategoryRepository;
-use IBlogRepository;
+use App\Models\Blog;
+use App\Models\BlogCategory;
+use App\Observers\BlogCategoryObserver;
+use App\Observers\BlogObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Blog::observe(BlogObserver::class);
+        BlogCategory::observe(BlogCategoryObserver::class);
     }
 }

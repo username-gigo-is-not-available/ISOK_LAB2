@@ -1,18 +1,13 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BlogCategoryResource;
-use App\Http\Resources\BlogResource;
-
-use App\Models\BlogCategory;
-use App\Models\SlugGenerator;
+use App\Resources\BlogResource;
 use App\Repositories\BlogCategoryRepository;
 use App\Repositories\BlogRepository;
 use App\Repositories\IBlogRepository;
 use Illuminate\Http\Request;
 
-class BlogController extends Controller
+class BlogAPIController extends Controller
 {
     protected BlogRepository $blogRepository;
     protected BlogCategoryRepository $blogCategoryRepository;
@@ -34,45 +29,22 @@ class BlogController extends Controller
     public function index(Request $request)
     {
 
-        $categories = $this->blogCategoryRepository->all();
-
-
-        $categoryId = $request->category;
-        $blogs = $this->blogRepository->all();
-
-        if ($categoryId) {
-            $category = $this->blogCategoryRepository->find($categoryId);
-            $blogs = $category->blogs;
-        }
-
-        return view('blogs.index', compact('blogs', 'categories'));
+        return BlogResource::collection($this->blogRepository->all());
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = BlogCategory::all();
-        return view('blogs.create', compact('categories'));
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $request['slug'] = SlugGenerator::slugify($request->title);
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
             'content' => 'required|string|min:50',
             'blog_category_id' => 'required|exists:blog_categories,id',
         ]);
-        $this->blogRepository->create($validatedData);
 
-        return redirect()->route('blogs.index');
+        return BlogResource::make($this->blogRepository->create($validatedData));
     }
 
     /**
@@ -80,35 +52,23 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        $blog = $this->blogRepository->find($id);
-        return view('blogs.show', compact('blog'));
+        return BlogResource::make($this->blogRepository->find($id));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $blog = $this->blogRepository->find($id);
-        $categories = BlogCategory::all();
-        return view('blogs.edit', compact('blog', 'categories'));
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
-        $request['slug'] = SlugGenerator::slugify($request->title);
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
             'content' => 'required|string|min:50',
             'blog_category_id' => 'required|exists:blog_categories,id',
         ]);
-        $this->blogRepository->update($id, $validatedData);
 
-        return redirect()->route('blogs.index');
+        return BlogResource::make($this->blogRepository->update($id, $validatedData));
+
     }
 
     /**
@@ -118,6 +78,6 @@ class BlogController extends Controller
     {
         $this->blogRepository->delete($id);
 
-        return redirect()->route('blogs.index');
+        return response()->json(null, 204);
     }
 }
